@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <!--Import Google Icon Font-->
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <!--Import materialize.css-->
+      <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css"  media="screen,projection"/>
+
+      <!--Let browser know website is optimized for mobile-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      <style>
+         #map {
+          height: 700px;
+          width: 100%;
+         }
+      </style>
+    </head>
+
+    <body>
+      <div class="container">
+        <h1 class="center-align thin">Journey of Israel</h1>
+        <center>
+        <div class="row">
+          <div class="col s6">
+            <a onclick="prelocation()" class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons">skip_previous</i></a>
+          </div>
+          <div class="col s6">
+            <a onclick="nxtlocation()" class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons">skip_next</i></a>
+          </div>
+        </div>
+        <center>
+        <div id="map"></div>
+      </div>
+      <!--Import jQuery before materialize.js-->
+      <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+      <script>
+      var datapoints = [
+          {coordinates:{lat: 30.798889, lng: 31.835833}, title: 'Rameses', description: 'Israel was thrust out of Egypt'},
+          {coordinates:{lat: 30.551944, lng: 32.098611}, title: 'Succoth', description: 'After the Hebrews left this first campsite, the Lord attended them in a cloud by day and in a pillar of fire by night'},
+          {coordinates:{lat: 30.065791, lng: 32.415869}, title: 'Pi-hahiroth ?', description: 'Israel passed through the Red Sea'},
+          {coordinates:{lat: 29.447464, lng: 32.768961}, title: 'Marah', description: 'The Lord healed the waters of Marah'},
+          {coordinates:{lat: 29.3, lng: 32.966667}, title: 'Elim', description: 'Israel camped by 12 springs'},
+          {coordinates:{lat: 28.983333, lng: 33.35}, title: 'Wilderness of Sin', description: 'The Lord sent manna and quail to feed Israel'},
+          {coordinates:{lat: 28.716667, lng: 33.65}, title: 'Rephidim', description: 'Israel fought with Amalek'},
+          {coordinates:{lat: 28.538476, lng: 33.974850}, title: 'Mount Sinai', description: 'The Lord revealed the Ten Commandments'},
+          {coordinates:{lat: 28.313234, lng: 34.166025}, title: 'Sinai Wilderness', description: 'Israel constructed the tabernacle'},
+          {coordinates:{lat: 28.748412, lng: 34.420623}, title: 'Wilderness Camps', description: 'Seventy elders were called to help Moses govern the people'},
+          {coordinates:{lat: 29.544414, lng: 34.982067}, title: 'Ezion-geber', description: 'Israel passed through the lands of Esau and Ammon in peace'},
+          {coordinates:{lat: 30.648333, lng: 34.422222}, title: 'Kadesh-barnea', description: 'Moses sent spies into the promised land; Israel rebelled and failed to enter the land; Kadesh served as the main camp of Israel for many years'},
+          {coordinates:{lat: 30.316944, lng: 35.406944}, title: 'Eastern Wilderness', description: 'Israel avoided conflict with Edom and Moab'},
+          {coordinates:{lat: 31.465833, lng: 35.573333}, title: 'Arnon River', description: 'Israel destroyed the Canaanites who fought against them'},
+          {coordinates:{lat: 31.766667, lng: 35.725}, title: 'Mount Nebo', description: 'Moses viewed the promised land. Moses delivered his last three sermons'},
+          {coordinates:{lat: 31.9, lng: 35.75}, title: 'Plains of Moab', description: 'The Lord told Israel to divide the land and dispossess the inhabitants'},
+          {coordinates:{lat: 32.033, lng: 35.4757}, title: 'Jordan River', description: 'Israel crossed the Jordan River on dry ground. Near Gilgal, stones from the bottom of the Jordan River were placed as a monument of Jordan’s waters being divided'},
+          {coordinates:{lat: 31.871111, lng: 35.444167}, title: 'Jericho', description: 'The children of Israel possessed and destroyed the city'}
+      ];
+      var pointer = 0;
+      var map;
+      var marker=[];
+      var contentString = [];
+      var infowindow =[];
+      var lineSymbol = {
+        path: 'M 0,-1 0,1',
+        strokeOpacity: 1,
+        scale: 4
+      };
+      var line = [];
+      function initMap() {
+        var uluru = datapoints[0].coordinates;
+        map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 10,
+          center: uluru
+        });
+        $.each(datapoints, function(index,value){
+          marker[index] = new google.maps.Marker({
+            position: datapoints[index].coordinates,
+            map: map,
+            title: datapoints[index].title,
+            label: (index+1).toString()
+          });
+          var contentString = '<div id="content">'+
+          '<div id="siteNotice">'+
+          '</div>'+
+          '<h4 id="firstHeading" class="firstHeading">'+datapoints[index].title+'</h4>'+
+          '<div id="bodyContent">'+
+          '<p>'+datapoints[index].description+'</p>'+
+          '</div>'+
+          '</div>';
+          infowindow[index] = new google.maps.InfoWindow({
+            content: contentString
+          });
+          marker[index].addListener('click', function() {
+            infowindow[index].open(map, marker[index]);
+          });
+          if(index<datapoints.length-1)
+          {
+            line[index] = new google.maps.Polyline({
+              path: [datapoints[index].coordinates, datapoints[index+1].coordinates],
+              strokeOpacity: 0,
+              icons: [{
+                icon: lineSymbol,
+                offset: '0',
+                repeat: '20px'
+              }],
+              map: map
+            });
+          }
+        });
+      }
+      function nxtlocation() {
+        if(pointer<datapoints.length-1)
+        {
+          pointer = pointer + 1;
+          var nearaust = datapoints[pointer].coordinates;
+          map.panTo(nearaust);
+        }
+        else
+        {
+          pointer = 0;
+          var nearaust = datapoints[pointer].coordinates;
+          map.panTo(nearaust);
+        }
+        /*
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 6,
+          center: nearaust
+        });
+        */
+
+      }
+      function prelocation() {
+        if(pointer>0)
+        {
+          pointer = pointer - 1;
+          var nearaust = datapoints[pointer].coordinates;
+          map.panTo(nearaust);
+        }
+        else
+        {
+          pointer = datapoints.length-1;
+          var nearaust = datapoints[pointer].coordinates;
+          map.panTo(nearaust);
+        }
+        /*
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 6,
+          center: nearaust
+        });
+        */
+
+      }
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAQfsppvISgx3wCcM05dDoblHCWHPPCdt4&callback=initMap">
+    </script>
+    </body>
+  </html>
